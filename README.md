@@ -47,14 +47,16 @@ Manual setup:
 python3 -m venv .venv
 source .venv/bin/activate
 python3 -m pip install -e .
-ollama pull llama3.2:3b
+/Applications/Ollama.app/Contents/Resources/ollama pull llama3.2:3b
 ```
 
-If you need to start Ollama manually:
+Correct macOS command to start the Ollama server:
 
 ```bash
 /Applications/Ollama.app/Contents/Resources/ollama serve
 ```
+
+Use this fixed path instead of plain `ollama serve` when the Homebrew formula is missing `llama-server`.
 
 ## Usage
 
