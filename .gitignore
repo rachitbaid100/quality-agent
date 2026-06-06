@@ -1,7 +1,7 @@
 .tca_cache/
 .venv/
 exports/
-vault/*.json
+vault/
 __pycache__/
 *.py[cod]
 .pytest_cache/
