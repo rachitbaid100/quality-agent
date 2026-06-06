@@ -1,0 +1,10 @@
+.tca_cache/
+.venv/
+exports/
+vault/*.json
+__pycache__/
+*.py[cod]
+.pytest_cache/
+build/
+dist/
+*.egg-info/

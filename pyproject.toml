@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "TC-Agent"
+version = "0.1.0"
+description = "TC-Agent V1: Ollama-backed local test case generation with local caching."
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{ name = "Rachit Baid" }]
+dependencies = ["mlx>=0.20.0; platform_system == 'Darwin' and platform_machine == 'arm64'"]
+
+[project.scripts]
+tcagent = "tcagent.cli:main"
+tcagent-vault = "tcagent.vault:main"
+
+[tool.setuptools.packages.find]
+include = ["tcagent*"]
