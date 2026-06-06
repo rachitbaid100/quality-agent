@@ -75,8 +75,8 @@ def resolve_secret(key: str, vault_path: Path = DEFAULT_VAULT_PATH) -> str | Non
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="tcagent-vault",
-        description="Manage TC-Agent V1 base64-encoded local secrets.",
+        prog="quality-agent-vault",
+        description="Manage quality-agent V1 base64-encoded local secrets.",
     )
     parser.add_argument("--vault-path", type=Path, default=DEFAULT_VAULT_PATH, help="Vault file path.")
 

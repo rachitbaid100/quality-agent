@@ -1,6 +1,6 @@
-# TC-Agent
+# quality-agent
 
-TC-Agent is a local test case generation tool for QA and SDET workflows. It takes a user story plus acceptance criteria, generates structured test cases with a local Ollama model, caches results on disk, and can export cached test cases to Excel.
+quality-agent is a local test case generation tool for QA and SDET workflows. It takes a user story plus acceptance criteria, generates structured test cases with a local Ollama model, caches results on disk, and can export cached test cases to Excel.
 
 The project is designed to avoid paid LLM APIs for V1. Generation runs locally through Ollama, with `llama3.2:3b` as the default model.
 
@@ -76,13 +76,13 @@ python3 run_tcagent.py
 Interactive CLI:
 
 ```bash
-python3 -m tcagent
+quality-agent
 ```
 
 Non-interactive CLI:
 
 ```bash
-python3 -m tcagent \
+quality-agent \
   --story "A new login page supports Google, Apple, and Facebook login" \
   --criteria "Users can sign in with each provider. Failed provider auth returns user to login page. Successful login redirects to dashboard."
 ```
@@ -90,12 +90,12 @@ python3 -m tcagent \
 Markdown output:
 
 ```bash
-python3 -m tcagent --format markdown
+quality-agent --format markdown
 ```
 
 ## Caching
 
-TC-Agent stores generated results in:
+quality-agent stores generated results in:
 
 ```text
 .tca_cache/cache.json
@@ -110,18 +110,18 @@ Each cache entry contains:
 - `result`: generated test cases.
 - `created_at`: UTC timestamp.
 
-If the same input is used again, TC-Agent returns the cached result without calling Ollama. If the input is similar enough, TC-Agent can also reuse a previous result.
+If the same input is used again, quality-agent returns the cached result without calling Ollama. If the input is similar enough, quality-agent can also reuse a previous result.
 
 Force fresh generation:
 
 ```bash
-python3 -m tcagent --no-cache
+quality-agent --no-cache
 ```
 
 Adjust similarity threshold:
 
 ```bash
-python3 -m tcagent --similarity-threshold 0.97
+quality-agent --similarity-threshold 0.97
 ```
 
 ## Excel Export
@@ -138,26 +138,26 @@ Default output:
 exports/test-cases-<cachekey-prefix>.xlsx
 ```
 
-If the cache key is missing, TC-Agent prints:
+If the cache key is missing, quality-agent prints:
 
 ```text
 Cache key not present.
 ```
 
-If the Excel file already exists, TC-Agent does not overwrite it.
+If the Excel file already exists, quality-agent does not overwrite it.
 
 ## Diagnostics
 
 Check Ollama connectivity:
 
 ```bash
-python3 -m tcagent --doctor
+quality-agent --doctor
 ```
 
 Check local runtime information:
 
 ```bash
-python3 -m tcagent --runtime-info
+quality-agent --runtime-info
 ```
 
 Override the Ollama model:
@@ -196,7 +196,7 @@ kill <PID>
 If Ollama is not reachable, confirm the service is running:
 
 ```bash
-python3 -m tcagent --doctor
+quality-agent --doctor
 ```
 
 ## Project Structure
@@ -228,6 +228,12 @@ Install editable package:
 python3 -m pip install -e .
 ```
 
+The legacy module command still works:
+
+```bash
+python3 -m tcagent
+```
+
 ## Git Ignore Policy
 
 The repo ignores local runtime artifacts:
@@ -239,5 +245,3 @@ The repo ignores local runtime artifacts:
 - Python bytecode and build outputs
 
 Generated cache files, Excel files, and vault secrets should not be committed.
-=======
-# quality-agent

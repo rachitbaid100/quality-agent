@@ -22,7 +22,7 @@ output_format = "json"
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Run TC-Agent with predefined story and criteria.")
+    parser = argparse.ArgumentParser(description="Run quality-agent with predefined story and criteria.")
     parser.add_argument("--excel", action="store_true", help="Export cached test cases to Excel by cache key.")
     parser.add_argument("--cachekey", help="Cache key to export when using --excel.")
     parser.add_argument("--output", type=Path, help="Optional output path.")

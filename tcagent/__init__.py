@@ -1,4 +1,4 @@
-"""TC-Agent V1 package."""
+"""quality-agent V1 package."""
 
 __all__ = ["__version__"]
 

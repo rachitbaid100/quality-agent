@@ -6,7 +6,7 @@ VENV_DIR="${PROJECT_DIR}/.venv"
 OLLAMA_MODEL="${TCA_MODEL:-llama3.2:3b}"
 OLLAMA_URL="${TCA_OLLAMA_URL:-http://127.0.0.1:11434}"
 OLLAMA_APP_BIN="/Applications/Ollama.app/Contents/Resources/ollama"
-OLLAMA_LOG="/tmp/tcagent-ollama.log"
+OLLAMA_LOG="/tmp/quality-agent-ollama.log"
 
 cd "${PROJECT_DIR}"
 

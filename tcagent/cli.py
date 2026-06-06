@@ -12,7 +12,7 @@ from .service import generate_test_cases_text
 
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(
-        prog="tcagent",
+        prog="quality-agent",
         description="Generate local Ollama-backed QA test cases with local caching.",
     )
     parser.add_argument("--story", help="User story to generate test cases for.")

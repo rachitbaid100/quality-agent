@@ -3,7 +3,7 @@ from __future__ import annotations
 from .models import GenerationInput
 
 
-PROMPT_VERSION = "tcagent-v1-compact-json"
+PROMPT_VERSION = "quality-agent-v1-compact-json"
 
 
 def build_generation_prompt(data: GenerationInput) -> str:
@@ -35,4 +35,3 @@ JSON shape:
 Input:
 {data.combined_text()}
 """
-
