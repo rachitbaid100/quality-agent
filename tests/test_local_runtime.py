@@ -1,6 +1,6 @@
 import unittest
 
-from tcagent.local_runtime import mlx_status
+from quality_agent.local_runtime import mlx_status
 
 
 class LocalRuntimeTest(unittest.TestCase):

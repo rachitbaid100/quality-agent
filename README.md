@@ -60,7 +60,7 @@ Use this fixed path instead of plain `ollama serve` when the Homebrew formula is
 
 ## Usage
 
-Edit [run_tcagent.py](run_tcagent.py), then set:
+Edit [run_quality_agent.py](run_quality_agent.py), then set:
 
 ```python
 story = "A new login page supports Google, Apple, and Facebook login"
@@ -70,7 +70,7 @@ criteria = "Users can sign in with each provider. Failed provider auth returns u
 Run:
 
 ```bash
-python3 run_tcagent.py
+python3 run_quality_agent.py
 ```
 
 Interactive CLI:
@@ -129,7 +129,7 @@ quality-agent --similarity-threshold 0.97
 Export a cached result to Excel:
 
 ```bash
-python3 run_tcagent.py --excel --cachekey="value of cache key"
+python3 run_quality_agent.py --excel --cachekey="value of cache key"
 ```
 
 Default output:
@@ -202,14 +202,14 @@ quality-agent --doctor
 ## Project Structure
 
 ```text
-tcagent/
+quality_agent/
   cache.py            # file-based cache
   cli.py              # command-line interface
   excel_exporter.py   # cached JSON to XLSX export
   ollama_client.py    # local Ollama generation client
   prompt.py           # compact prompt template
   service.py          # generation orchestration
-run_tcagent.py        # simple editable runner
+run_quality_agent.py  # simple editable runner
 setup.sh              # macOS setup helper
 tests/                # unit tests
 ```
@@ -228,10 +228,10 @@ Install editable package:
 python3 -m pip install -e .
 ```
 
-The legacy module command still works:
+Module execution also works:
 
 ```bash
-python3 -m tcagent
+python3 -m quality_agent
 ```
 
 ## Git Ignore Policy

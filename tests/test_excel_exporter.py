@@ -3,7 +3,7 @@ import tempfile
 import unittest
 from zipfile import ZipFile
 
-from tcagent.excel_exporter import export_test_cases_to_excel
+from quality_agent.excel_exporter import export_test_cases_to_excel
 
 
 class ExcelExporterTest(unittest.TestCase):

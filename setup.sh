@@ -103,4 +103,4 @@ fi
 
 echo "Setup complete."
 echo "Run: source .venv/bin/activate"
-echo "Then run: python3 run_tcagent.py"
+echo "Then run: python3 run_quality_agent.py"

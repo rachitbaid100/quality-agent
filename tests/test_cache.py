@@ -2,8 +2,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tcagent.cache import LocalCache
-from tcagent.models import GenerationInput
+from quality_agent.cache import LocalCache
+from quality_agent.models import GenerationInput
 
 
 class LocalCacheTest(unittest.TestCase):

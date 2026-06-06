@@ -2,8 +2,8 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tcagent.models import GenerationInput
-from tcagent.service import generate_test_cases, generate_test_cases_text
+from quality_agent.models import GenerationInput
+from quality_agent.service import generate_test_cases, generate_test_cases_text
 
 
 def fake_generator(data: GenerationInput):

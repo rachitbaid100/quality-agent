@@ -12,8 +12,8 @@ authors = [{ name = "Rachit Baid" }]
 dependencies = ["mlx>=0.20.0; platform_system == 'Darwin' and platform_machine == 'arm64'"]
 
 [project.scripts]
-quality-agent = "tcagent.cli:main"
-quality-agent-vault = "tcagent.vault:main"
+quality-agent = "quality_agent.cli:main"
+quality-agent-vault = "quality_agent.vault:main"
 
 [tool.setuptools.packages.find]
-include = ["tcagent*"]
+include = ["quality_agent*"]

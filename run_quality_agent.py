@@ -4,10 +4,10 @@ import argparse
 from pathlib import Path
 import sys
 
-from tcagent.cache import DEFAULT_CACHE_PATH, LocalCache
-from tcagent.excel_exporter import export_test_cases_to_excel
-from tcagent.ollama_client import LocalGenerationError
-from tcagent.service import generate_test_cases_text
+from quality_agent.cache import DEFAULT_CACHE_PATH, LocalCache
+from quality_agent.excel_exporter import export_test_cases_to_excel
+from quality_agent.ollama_client import LocalGenerationError
+from quality_agent.service import generate_test_cases_text
 
 
 story = "A new login page supports Google, Apple, and Facebook login"

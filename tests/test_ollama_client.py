@@ -4,8 +4,8 @@ import urllib.error
 import unittest
 from unittest.mock import patch
 
-from tcagent.models import GenerationInput
-from tcagent.ollama_client import LocalGenerationError, generate_with_ollama, get_ollama_command, get_ollama_tags, parse_model_json
+from quality_agent.models import GenerationInput
+from quality_agent.ollama_client import LocalGenerationError, generate_with_ollama, get_ollama_command, get_ollama_tags, parse_model_json
 
 
 class ParseModelJsonTest(unittest.TestCase):
@@ -57,7 +57,7 @@ class GenerateWithOllamaTest(unittest.TestCase):
 
         data = GenerationInput("story", "criteria", "llama3.2:3b")
         with patch("urllib.request.urlopen", side_effect=urllib.error.URLError("blocked")):
-            with patch("tcagent.ollama_client.get_ollama_command", return_value="/opt/homebrew/bin/ollama"):
+            with patch("quality_agent.ollama_client.get_ollama_command", return_value="/opt/homebrew/bin/ollama"):
                 with patch("subprocess.run", return_value=FakeCompleted()):
                     payload = generate_with_ollama(data)
 
@@ -84,7 +84,7 @@ class GenerateWithOllamaTest(unittest.TestCase):
     def test_prefers_app_binary_when_path_install_is_missing_runtime(self):
         with patch.dict("os.environ", {}, clear=True):
             with patch("os.path.exists", return_value=True):
-                with patch("tcagent.ollama_client._path_install_has_llama_server", return_value=False):
+                with patch("quality_agent.ollama_client._path_install_has_llama_server", return_value=False):
                     self.assertEqual(
                         get_ollama_command(),
                         "/Applications/Ollama.app/Contents/Resources/ollama",

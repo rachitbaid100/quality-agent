@@ -2,7 +2,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from tcagent.vault import Vault, VaultError
+from quality_agent.vault import Vault, VaultError
 
 
 class VaultTest(unittest.TestCase):

@@ -3,15 +3,15 @@ import tempfile
 import unittest
 from unittest.mock import patch
 
-import run_tcagent
-from tcagent.cache import LocalCache
-from tcagent.models import GenerationInput
+import run_quality_agent
+from quality_agent.cache import LocalCache
+from quality_agent.models import GenerationInput
 
 
 class RunnerTest(unittest.TestCase):
     def test_export_cached_excel_missing_key(self):
-        with patch("run_tcagent.DEFAULT_CACHE_PATH", Path("missing-cache.json")):
-            self.assertEqual(run_tcagent.export_cached_excel("missing", None), 1)
+        with patch("run_quality_agent.DEFAULT_CACHE_PATH", Path("missing-cache.json")):
+            self.assertEqual(run_quality_agent.export_cached_excel("missing", None), 1)
 
     def test_export_cached_excel_present_key(self):
         with tempfile.TemporaryDirectory() as tmpdir:
@@ -22,8 +22,8 @@ class RunnerTest(unittest.TestCase):
             LocalCache(cache_path).set(data, result)
             key = LocalCache(cache_path)._read_entries()[0].key
 
-            with patch("run_tcagent.DEFAULT_CACHE_PATH", cache_path):
-                status = run_tcagent.export_cached_excel(key, output_path)
+            with patch("run_quality_agent.DEFAULT_CACHE_PATH", cache_path):
+                status = run_quality_agent.export_cached_excel(key, output_path)
 
             self.assertEqual(status, 0)
             self.assertTrue(output_path.exists())
@@ -38,8 +38,8 @@ class RunnerTest(unittest.TestCase):
             LocalCache(cache_path).set(data, result)
             key = LocalCache(cache_path)._read_entries()[0].key
 
-            with patch("run_tcagent.DEFAULT_CACHE_PATH", cache_path):
-                status = run_tcagent.export_cached_excel(key, output_path)
+            with patch("run_quality_agent.DEFAULT_CACHE_PATH", cache_path):
+                status = run_quality_agent.export_cached_excel(key, output_path)
 
             self.assertEqual(status, 0)
             self.assertEqual(output_path.read_text(encoding="utf-8"), "existing")
