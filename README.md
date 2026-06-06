@@ -33,11 +33,13 @@ Recommended:
 source .venv/bin/activate
 ```
 
-`setup.sh` installs Python dependencies, installs Ollama when needed, starts the Ollama service, and pulls the configured model. If the Homebrew Ollama formula is missing `llama-server`, the script installs the official Ollama app bundle and uses:
+`setup.sh` installs Python dependencies, resolves a healthy Ollama binary, starts the Ollama service, pulls the configured model, and validates actual generation. On macOS, it prefers the official Ollama app bundle because that includes the required `llama-server` runtime:
 
 ```bash
 /Applications/Ollama.app/Contents/Resources/ollama
 ```
+
+The Homebrew formula is used only when it has the required `llama-server` runtime. If an existing listener responds to `/api/tags` but fails `/api/generate`, setup reports how to stop and restart Ollama with the healthy binary.
 
 Manual setup:
 
@@ -235,4 +237,3 @@ The repo ignores local runtime artifacts:
 - Python bytecode and build outputs
 
 Generated cache files, Excel files, and vault secrets should not be committed.
-

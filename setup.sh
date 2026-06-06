@@ -6,6 +6,7 @@ VENV_DIR="${PROJECT_DIR}/.venv"
 OLLAMA_MODEL="${TCA_MODEL:-llama3.2:3b}"
 OLLAMA_URL="${TCA_OLLAMA_URL:-http://127.0.0.1:11434}"
 OLLAMA_APP_BIN="/Applications/Ollama.app/Contents/Resources/ollama"
+OLLAMA_LOG="/tmp/tcagent-ollama.log"
 
 cd "${PROJECT_DIR}"
 
@@ -15,21 +16,53 @@ if ! command -v brew >/dev/null 2>&1; then
   exit 1
 fi
 
-if ! command -v ollama >/dev/null 2>&1; then
-  brew install ollama
-fi
+formula_has_llama_server() {
+  if ! brew --prefix ollama >/dev/null 2>&1; then
+    return 1
+  fi
 
-OLLAMA_PREFIX="$(brew --prefix ollama)"
-if ! find "${OLLAMA_PREFIX}" -name llama-server -type f -perm -111 | grep -q .; then
-  echo "Homebrew Ollama formula is missing llama-server. Installing Ollama app bundle..."
+  local prefix
+  prefix="$(brew --prefix ollama)"
+  find "${prefix}" -name llama-server -type f -perm -111 | grep -q .
+}
+
+ensure_ollama_app() {
+  if [[ -x "${OLLAMA_APP_BIN}" ]]; then
+    return
+  fi
+
+  echo "Installing official Ollama app bundle..."
   brew install --cask ollama-app
-fi
+}
 
-if [[ -x "${OLLAMA_APP_BIN}" ]] && ! find "${OLLAMA_PREFIX}" -name llama-server -type f -perm -111 | grep -q .; then
-  OLLAMA_BIN="${OLLAMA_APP_BIN}"
-else
-  OLLAMA_BIN="$(command -v ollama)"
-fi
+resolve_ollama_bin() {
+  if [[ -n "${TCA_OLLAMA_BIN:-}" ]]; then
+    echo "${TCA_OLLAMA_BIN}"
+    return
+  fi
+
+  if [[ -x "${OLLAMA_APP_BIN}" ]]; then
+    echo "${OLLAMA_APP_BIN}"
+    return
+  fi
+
+  if formula_has_llama_server; then
+    command -v ollama
+    return
+  fi
+
+  ensure_ollama_app
+  echo "${OLLAMA_APP_BIN}"
+}
+
+validate_ollama_generation() {
+  curl -fsS "${OLLAMA_URL}/api/generate" \
+    -H "Content-Type: application/json" \
+    -d "{\"model\":\"${OLLAMA_MODEL}\",\"prompt\":\"Return only: ok\",\"stream\":false}" \
+    >/dev/null
+}
+
+OLLAMA_BIN="$(resolve_ollama_bin)"
 
 if [[ ! -d "${VENV_DIR}" ]]; then
   python3 -m venv "${VENV_DIR}"
@@ -42,7 +75,7 @@ python3 -m pip install -r requirements.txt
 python3 -m pip install -e .
 
 if ! curl -fsS "${OLLAMA_URL}/api/tags" >/dev/null 2>&1; then
-  nohup "${OLLAMA_BIN}" serve >/tmp/tcagent-ollama.log 2>&1 &
+  nohup "${OLLAMA_BIN}" serve >"${OLLAMA_LOG}" 2>&1 &
 fi
 
 for _ in {1..30}; do
@@ -54,11 +87,19 @@ done
 
 if ! curl -fsS "${OLLAMA_URL}/api/tags" >/dev/null 2>&1; then
   echo "Ollama did not become ready at ${OLLAMA_URL}."
-  echo "Check /tmp/tcagent-ollama.log, then run: ollama serve"
+  echo "Check ${OLLAMA_LOG}, then run: ${OLLAMA_BIN} serve"
   exit 1
 fi
 
 "${OLLAMA_BIN}" pull "${OLLAMA_MODEL}"
+
+if ! validate_ollama_generation; then
+  echo "Ollama is reachable, but generation failed."
+  echo "A broken listener may already be running at ${OLLAMA_URL}."
+  echo "Stop the current listener, then restart with:"
+  echo "${OLLAMA_BIN} serve"
+  exit 1
+fi
 
 echo "Setup complete."
 echo "Run: source .venv/bin/activate"
