@@ -1,17 +1,28 @@
-# TC-Agent V1
+# TC-Agent
 
-TC-Agent V1 generates the first set of QA test cases from a user story and acceptance criteria using a local Ollama 3B model. Results are cached locally, so repeated or highly similar inputs can return without another model call.
+TC-Agent is a local test case generation tool for QA and SDET workflows. It takes a user story plus acceptance criteria, generates structured test cases with a local Ollama model, caches results on disk, and can export cached test cases to Excel.
+
+The project is designed to avoid paid LLM APIs for V1. Generation runs locally through Ollama, with `llama3.2:3b` as the default model.
 
 ## Features
 
-- Uses Ollama locally.
-- Defaults to `llama3.2:3b`.
-- Imports Apple's `mlx` library when available for local Apple Silicon runtime visibility.
-- Accepts user story and acceptance criteria from CLI flags or interactive input.
-- Stores cached generations in `.tca_cache/cache.json`.
-- Returns cached results for exact or similar prompts.
-- Outputs JSON by default, with Markdown as an option.
-- Keeps the prompt compact to reduce token usage.
+- Local LLM generation through Ollama.
+- Default model: `llama3.2:3b`.
+- JSON output by default.
+- Markdown output option.
+- File-based cache for exact and similar prompts.
+- Excel export from cached results.
+- Optional Apple MLX runtime check on Apple Silicon.
+- No OpenAI API key required.
+
+## Requirements
+
+- Python 3.10+
+- Ollama
+- `llama3.2:3b` model pulled locally
+- macOS with Homebrew for the current `setup.sh`
+
+The core Python app talks to Ollama over `http://127.0.0.1:11434`, so it can be extended to Linux and Windows later. The current setup automation is macOS-oriented.
 
 ## Setup
 
@@ -22,58 +33,34 @@ Recommended:
 source .venv/bin/activate
 ```
 
-`setup.sh` installs Ollama with Homebrew if needed. If the Homebrew formula is missing `llama-server`, it installs the official Ollama app bundle and uses `/Applications/Ollama.app/Contents/Resources/ollama`.
+`setup.sh` installs Python dependencies, installs Ollama when needed, starts the Ollama service, and pulls the configured model. If the Homebrew Ollama formula is missing `llama-server`, the script installs the official Ollama app bundle and uses:
 
-Manual:
+```bash
+/Applications/Ollama.app/Contents/Resources/ollama
+```
+
+Manual setup:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
-pip install -e .
+python3 -m pip install -e .
 ollama pull llama3.2:3b
 ```
 
-Minimal dependency install without editable project setup:
+If you need to start Ollama manually:
 
 ```bash
-python3 -m pip install -r requirements.txt
+/Applications/Ollama.app/Contents/Resources/ollama serve
 ```
-
-Optional model override:
-
-```bash
-export TCA_MODEL="llama3.2:3b"
-```
-
-Optional Ollama URL override:
-
-```bash
-export TCA_OLLAMA_URL="http://127.0.0.1:11434"
-```
-
-Runtime check:
-
-```bash
-python3 -m tcagent --runtime-info
-```
-
-Ollama connectivity check:
-
-```bash
-python3 -m tcagent --doctor
-```
-
-Make sure the Ollama app or service is running before generating test cases.
 
 ## Usage
-
-Simple runner:
 
 Edit [run_tcagent.py](run_tcagent.py), then set:
 
 ```python
-story = "some story"
-criteria = "some criteria"
+story = "A new login page supports Google, Apple, and Facebook login"
+criteria = "Users can sign in with each provider. Failed provider auth returns user to login page. Successful login redirects to dashboard."
 ```
 
 Run:
@@ -82,21 +69,13 @@ Run:
 python3 run_tcagent.py
 ```
 
-Export a cached result to Excel:
-
-```bash
-python3 run_tcagent.py --excel --cachekey="value of cache key"
-```
-
-If the cache key is not present, the command exits without generating test cases.
-
-Interactive mode:
+Interactive CLI:
 
 ```bash
 python3 -m tcagent
 ```
 
-Non-interactive mode:
+Non-interactive CLI:
 
 ```bash
 python3 -m tcagent \
@@ -110,20 +89,150 @@ Markdown output:
 python3 -m tcagent --format markdown
 ```
 
-Force a fresh Ollama generation and update the cache:
+## Caching
+
+TC-Agent stores generated results in:
+
+```text
+.tca_cache/cache.json
+```
+
+Each cache entry contains:
+
+- `key`: SHA-256 hash for exact cache lookup.
+- `normalized_text`: cleaned user story and criteria for similarity lookup.
+- `model`: model used for generation.
+- `prompt_version`: prompt template version.
+- `result`: generated test cases.
+- `created_at`: UTC timestamp.
+
+If the same input is used again, TC-Agent returns the cached result without calling Ollama. If the input is similar enough, TC-Agent can also reuse a previous result.
+
+Force fresh generation:
 
 ```bash
 python3 -m tcagent --no-cache
 ```
 
-Adjust similarity matching:
+Adjust similarity threshold:
 
 ```bash
 python3 -m tcagent --similarity-threshold 0.97
 ```
 
-## Run Tests
+## Excel Export
+
+Export a cached result to Excel:
+
+```bash
+python3 run_tcagent.py --excel --cachekey="value of cache key"
+```
+
+Default output:
+
+```text
+exports/test-cases-<cachekey-prefix>.xlsx
+```
+
+If the cache key is missing, TC-Agent prints:
+
+```text
+Cache key not present.
+```
+
+If the Excel file already exists, TC-Agent does not overwrite it.
+
+## Diagnostics
+
+Check Ollama connectivity:
+
+```bash
+python3 -m tcagent --doctor
+```
+
+Check local runtime information:
+
+```bash
+python3 -m tcagent --runtime-info
+```
+
+Override the Ollama model:
+
+```bash
+export TCA_MODEL="llama3.2:3b"
+```
+
+Override the Ollama URL:
+
+```bash
+export TCA_OLLAMA_URL="http://127.0.0.1:11434"
+```
+
+Override the Ollama binary:
+
+```bash
+export TCA_OLLAMA_BIN="/Applications/Ollama.app/Contents/Resources/ollama"
+```
+
+## Troubleshooting
+
+If you see `llama-server binary not found`, your Homebrew Ollama formula is missing required runtime files. Use the official app-bundled binary:
+
+```bash
+/Applications/Ollama.app/Contents/Resources/ollama serve
+```
+
+If port `11434` is already in use:
+
+```bash
+lsof -nP -iTCP:11434
+kill <PID>
+```
+
+If Ollama is not reachable, confirm the service is running:
+
+```bash
+python3 -m tcagent --doctor
+```
+
+## Project Structure
+
+```text
+tcagent/
+  cache.py            # file-based cache
+  cli.py              # command-line interface
+  excel_exporter.py   # cached JSON to XLSX export
+  ollama_client.py    # local Ollama generation client
+  prompt.py           # compact prompt template
+  service.py          # generation orchestration
+run_tcagent.py        # simple editable runner
+setup.sh              # macOS setup helper
+tests/                # unit tests
+```
+
+## Development
+
+Run tests:
 
 ```bash
 python3 -m unittest discover
 ```
+
+Install editable package:
+
+```bash
+python3 -m pip install -e .
+```
+
+## Git Ignore Policy
+
+The repo ignores local runtime artifacts:
+
+- `.venv/`
+- `.tca_cache/`
+- `exports/`
+- `vault/`
+- Python bytecode and build outputs
+
+Generated cache files, Excel files, and vault secrets should not be committed.
+
