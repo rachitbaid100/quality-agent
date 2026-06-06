@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # TC-Agent
 
 TC-Agent is a local test case generation tool for QA and SDET workflows. It takes a user story plus acceptance criteria, generates structured test cases with a local Ollama model, caches results on disk, and can export cached test cases to Excel.
@@ -239,3 +240,6 @@ The repo ignores local runtime artifacts:
 - Python bytecode and build outputs
 
 Generated cache files, Excel files, and vault secrets should not be committed.
+=======
+# quality-agent
+>>>>>>> d6775d55b1c9c933f6195c70e4727fe3f91c272c
