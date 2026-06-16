@@ -11,10 +11,67 @@ OLLAMA_LOG="/tmp/quality-agent-ollama.log"
 cd "${PROJECT_DIR}"
 
 if ! command -v brew >/dev/null 2>&1; then
-  echo "Homebrew is required to install Ollama automatically."
+  echo "Homebrew is required."
   echo "Install Homebrew from https://brew.sh, then rerun ./setup.sh"
   exit 1
 fi
+
+resolve_python_bin() {
+  for candidate in python3.12 python3.11 /opt/homebrew/bin/python3.11 /usr/local/bin/python3.11; do
+    if command -v "${candidate}" >/dev/null 2>&1 || [[ -x "${candidate}" ]]; then
+      if "${candidate}" - <<'PY' >/dev/null 2>&1
+import sys
+raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
+PY
+      then
+        echo "${candidate}"
+        return
+      fi
+    fi
+  done
+
+  echo "Python 3.11+ not found. Installing python@3.11 via Homebrew..." >&2
+  brew install python@3.11
+
+  for candidate in /opt/homebrew/bin/python3.11 /usr/local/bin/python3.11 python3.11; do
+    if command -v "${candidate}" >/dev/null 2>&1 || [[ -x "${candidate}" ]]; then
+      echo "${candidate}"
+      return
+    fi
+  done
+
+  echo "Python 3.11 installation failed." >&2
+  exit 1
+}
+
+PYTHON_BIN="$(resolve_python_bin)"
+
+echo "Using Python binary: ${PYTHON_BIN}"
+"${PYTHON_BIN}" --version
+
+if [[ -d "${VENV_DIR}" ]]; then
+  if ! "${VENV_DIR}/bin/python" - <<'PY' >/dev/null 2>&1
+import sys
+raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
+PY
+  then
+    echo "Existing .venv is below Python 3.11. Recreating..."
+    rm -rf "${VENV_DIR}"
+  fi
+fi
+
+if [[ ! -d "${VENV_DIR}" ]]; then
+  "${PYTHON_BIN}" -m venv "${VENV_DIR}"
+fi
+
+source "${VENV_DIR}/bin/activate"
+
+echo "Virtualenv Python:"
+python --version
+
+python -m pip install --upgrade pip
+python -m pip install -r requirements.txt
+python -m pip install -e .
 
 formula_has_llama_server() {
   if ! brew --prefix ollama >/dev/null 2>&1; then
@@ -95,7 +152,6 @@ fi
 
 if ! validate_ollama_generation; then
   echo "Ollama is reachable, but generation failed."
-  echo "A broken listener may already be running at ${OLLAMA_URL}."
   echo "Stop the current listener, then restart with:"
   echo "${OLLAMA_BIN} serve"
   exit 1
@@ -103,4 +159,4 @@ fi
 
 echo "Setup complete."
 echo "Run: source .venv/bin/activate"
-echo "Then run: python3 run_quality_agent.py"
+echo "Then run: python run_quality_agent.py"
