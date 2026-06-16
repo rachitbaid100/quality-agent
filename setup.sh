@@ -1,3 +1,4 @@
+cat > setup.sh <<'EOF'
 #!/usr/bin/env bash
 set -euo pipefail
 
@@ -31,7 +32,7 @@ PY
   done
 
   echo "Python 3.11+ not found. Installing python@3.11 via Homebrew..." >&2
-  brew install python@3.11
+  brew install python@3.11 >&2
 
   for candidate in /opt/homebrew/bin/python3.11 /usr/local/bin/python3.11 python3.11; do
     if command -v "${candidate}" >/dev/null 2>&1 || [[ -x "${candidate}" ]]; then
@@ -49,20 +50,9 @@ PYTHON_BIN="$(resolve_python_bin)"
 echo "Using Python binary: ${PYTHON_BIN}"
 "${PYTHON_BIN}" --version
 
-if [[ -d "${VENV_DIR}" ]]; then
-  if ! "${VENV_DIR}/bin/python" - <<'PY' >/dev/null 2>&1
-import sys
-raise SystemExit(0 if sys.version_info >= (3, 11) else 1)
-PY
-  then
-    echo "Existing .venv is below Python 3.11. Recreating..."
-    rm -rf "${VENV_DIR}"
-  fi
-fi
-
-if [[ ! -d "${VENV_DIR}" ]]; then
-  "${PYTHON_BIN}" -m venv "${VENV_DIR}"
-fi
+echo "Recreating virtualenv with Python 3.11+..."
+rm -rf "${VENV_DIR}"
+"${PYTHON_BIN}" -m venv "${VENV_DIR}"
 
 source "${VENV_DIR}/bin/activate"
 
@@ -152,6 +142,7 @@ fi
 
 if ! validate_ollama_generation; then
   echo "Ollama is reachable, but generation failed."
+  echo "A broken listener may already be running at ${OLLAMA_URL}."
   echo "Stop the current listener, then restart with:"
   echo "${OLLAMA_BIN} serve"
   exit 1
@@ -160,3 +151,8 @@ fi
 echo "Setup complete."
 echo "Run: source .venv/bin/activate"
 echo "Then run: python run_quality_agent.py"
+EOF
+
+chmod +x setup.sh
+rm -rf .venv
+./setup.sh
